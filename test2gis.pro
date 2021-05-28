@@ -5,6 +5,8 @@ CONFIG += c++14
 DESTDIR = $${PWD}/bin
 
 SOURCES += \
+        src/backend/backend.cpp \
+        src/gui/histogrammodel.cpp \
         src/main.cpp
 
 RESOURCES += resources/qml.qrc
@@ -16,3 +18,7 @@ RESOURCES += resources/qml.qrc
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+HEADERS += \
+    src/backend/backend.h \
+    src/gui/histogrammodel.h
