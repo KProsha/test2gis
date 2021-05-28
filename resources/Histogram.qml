@@ -1,5 +1,5 @@
 import QtQuick 2.15
-
+import QtQuick.Controls 2.15
 import HistogramModel 1.0
 
 Rectangle {
@@ -16,7 +16,19 @@ Rectangle {
     property int margin: 40
     property int spacing: 2
 
+    property var fontName: "Courier"
+    property int fontHeight: 14
 
+    Text {
+        id: fileName
+        text: root.model.fileName
+        anchors.top: parent.top
+        anchors.topMargin: margin
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        font.family: fontName
+        font.pixelSize: fontHeight
+    }
 
     Column{
         id:field
@@ -26,14 +38,14 @@ Rectangle {
         height: root.height - axisY - margin * 2
         width: root.width - axisX - margin
         x: margin
-        y: margin
+        y: margin + fileName.height
 
         Repeater{
             model: root.model
 
             Rectangle {
                 height: (field.height - (field.spacing * root.model.rowCount())) / root.model.count
-                width:field.width
+                width: field.width - 80
 
                 Rectangle{
                     x: axisX - margin
@@ -47,9 +59,9 @@ Rectangle {
 
                     Text {
                         text: valueRole
-                        x:parent.width / 2
-                        font.family: "Courier"
-                        font.pixelSize: 14
+                        x: parent.parent.width + 10
+                        font.family: fontName
+                        font.pixelSize: fontHeight
                     }
 
                 }
@@ -57,8 +69,8 @@ Rectangle {
                 Text {
                     TextMetrics {
                        id: textMetrics
-                       font.family: "Courier"
-                       font.pixelSize: 14
+                       font.family: fontName
+                       font.pixelSize: fontHeight
                        text: root.model.headerData(index, Qt.Horizontal)
                     }
 
@@ -75,9 +87,21 @@ Rectangle {
         border.color:  "black"
         border.width: 2
         x: axisX - 2
-        width: field.width + 4
-        y: margin
+        width: field.width - 75
+        y: field.y
         height:  field.height
+    }
+
+    ProgressBar {
+        id: progressBar
+        x: margin
+        y: parent.height - margin - height
+        width: parent.width - margin * 2
+
+        from: 0
+        to: 100
+
+        value: 0.5
     }
 
 

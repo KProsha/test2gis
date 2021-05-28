@@ -9,6 +9,8 @@ class HistogramModel : public QAbstractListModel
 
     Q_PROPERTY(int count READ count NOTIFY sigCountChanged)
     Q_PROPERTY(int maxValue READ maxValue NOTIFY sigMaxValueChanged)
+    Q_PROPERTY(QString fileName READ fileName NOTIFY sigFileNameChanged)
+    Q_PROPERTY(int percent READ percent NOTIFY sigPercentChanged)
 
 public:
     const int ValueRole = Qt::UserRole;
@@ -25,13 +27,25 @@ public:
 
     int maxValue() const;
 
+    QString fileName() const;
+    int percent() const;
+
+public slots:
+    void setFileName(const QString& fileName);
+    void setPercent(int percent);
+    void setData(QList<QPair<QString, int> > data);
+
 signals:
     void sigCountChanged();
     void sigMaxValueChanged();
-
+    void sigFileNameChanged();
+    void sigPercentChanged();
 
 private:
+    QString _fileName;
+    int _percent;
 
+    QList<QPair<QString, int> > _data;
 
 };
 

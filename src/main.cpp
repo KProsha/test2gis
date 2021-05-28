@@ -13,10 +13,12 @@ int main(int argc, char *argv[])
     Backend backend;
 
     qmlRegisterUncreatableType<HistogramModel>("HistogramModel", 1, 0, "HistogramModel","Error:HistogramModel was created in QML");
+    qmlRegisterUncreatableType<Backend>("Backend", 1, 0, "Backend","Error:Backend was created in QML");
 
     QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty("histogramModel", backend.histogramModel());
+    engine.rootContext()->setContextProperty("backend", &backend);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

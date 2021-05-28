@@ -3,7 +3,7 @@
 HistogramModel::HistogramModel(QObject* parent): QAbstractListModel(parent)
 {
 
-
+_fileName = "dddd.txt";
 }
 
 int HistogramModel::count() const
@@ -38,5 +38,34 @@ QHash<int, QByteArray> HistogramModel::roleNames() const
 int HistogramModel::maxValue() const
 {
     return 15 * 100;
+}
+
+QString HistogramModel::fileName() const
+{
+    return _fileName;
+}
+
+void HistogramModel::setFileName(const QString& fileName)
+{
+    _fileName = fileName;
+    emit sigFileNameChanged();
+}
+
+int HistogramModel::percent() const
+{
+    return _percent;
+}
+
+void HistogramModel::setPercent(int percent)
+{
+    _percent = percent;
+    emit sigPercentChanged();
+}
+
+void HistogramModel::setData(QList<QPair<QString, int> > data)
+{
+    beginResetModel();
+    _data = data;
+    endResetModel();
 }
 
