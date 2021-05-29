@@ -1,14 +1,17 @@
 #include "histogrammodel.h"
 
+#include <QPair>
+#include <QDebug>
+
 HistogramModel::HistogramModel(QObject* parent): QAbstractListModel(parent)
 {
-
-_fileName = "dddd.txt";
+    _percent = 0;
+    _maxValue = 0;
 }
 
 int HistogramModel::count() const
 {
-    return 15;
+    return _data.count();
 }
 
 int HistogramModel::rowCount(const QModelIndex& parent) const
@@ -18,14 +21,19 @@ int HistogramModel::rowCount(const QModelIndex& parent) const
 
 QVariant HistogramModel::data(const QModelIndex& index, int role) const
 {
-    if(role == ValueRole) return index.row() * 100;
+    if((index.row() < 0) || (index.row() >= _data.size())) return QVariant();
+
+    if(role == ValueRole) {
+        return _data[index.row()].second;
+    }
 
     return QVariant();
 }
 
 QVariant HistogramModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    return "section " + QString::number(section);
+    if((section < 0) || (section >= _data.size())) return QVariant("");
+    return _data[section].first;
 }
 
 QHash<int, QByteArray> HistogramModel::roleNames() const
@@ -37,7 +45,7 @@ QHash<int, QByteArray> HistogramModel::roleNames() const
 
 int HistogramModel::maxValue() const
 {
-    return 15 * 100;
+    return _maxValue;
 }
 
 QString HistogramModel::fileName() const
@@ -62,10 +70,17 @@ void HistogramModel::setPercent(int percent)
     emit sigPercentChanged();
 }
 
-void HistogramModel::setData(QList<QPair<QString, int> > data)
+void HistogramModel::setData(HistogramState state)
 {
     beginResetModel();
-    _data = data;
+    _data.clear();
+    _maxValue = 0;
+
+    for(auto it = state.begin(); it != state.end(); ++it){
+        _data.append(QPair<QString, int>(it.key(), it.value()));
+        _maxValue = qMax(_maxValue, it.value());
+    }
+
     endResetModel();
 }
 

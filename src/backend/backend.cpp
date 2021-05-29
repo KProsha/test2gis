@@ -1,5 +1,7 @@
 #include "backend.h"
 
+#include <QFileInfo>
+
 Backend::Backend(QObject *parent): QObject(parent)
 {
     parserThread = new QThread(this);
@@ -33,6 +35,11 @@ HistogramModel* Backend::histogramModel() const
 
 void Backend::setFileName(const QString& fileName)
 {
+    QFileInfo fileInfo(fileName);
+    if(!fileInfo.exists()){
+        emit sigError(tr("Нет такого файла"));
+        return;
+    }
     emit sigParseFile(fileName);
 }
 

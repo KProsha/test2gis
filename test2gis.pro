@@ -14,5 +14,6 @@ RESOURCES += resources/qml.qrc
 
 HEADERS += \
     src/backend/backend.h \
+    src/backend/histogramstate.h \
     src/backend/parser.h \
     src/gui/histogrammodel.h

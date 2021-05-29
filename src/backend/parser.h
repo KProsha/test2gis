@@ -4,7 +4,8 @@
 #include <QObject>
 #include <QHash>
 #include <QString>
-#include <QPair>
+
+#include "histogramstate.h"
 
 class Parser : public QObject
 {
@@ -13,17 +14,16 @@ public:
     explicit Parser(QObject *parent = nullptr);
 
 public slots:
-    void parceFile(const QString &parameter);
+    void parceFile(const QString &fileName);
 
 signals:
-    void sigState(QList<QPair<QString, int> > state);
+    void sigState(HistogramState state);
     void sigPercent(int value);
 
 private:
     QHash<QString, int> _dictionary;
 
 };
-
 
 
 #endif // PARSER_H

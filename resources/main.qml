@@ -36,13 +36,23 @@ ApplicationWindow {
 
         TextInput {
             id: fileNameInput
-            text: qsTr("Имя файла")
+//            text: qsTr("Имя файла")
+//            text: "../test/test1.txt"
+            text: "../test/test2.txt"
+//            text: "../test/test3.txt"
             anchors.fill: parent
             font.pixelSize: 12
             anchors.leftMargin: 10
         }
     }
 
+
+    Dialog {
+        id: errorDialog
+        title: qsTr("Ошибка")
+        modal: true
+        standardButtons: Dialog.Ok
+    }
 
     Histogram{
         anchors.left: parent.left
@@ -53,12 +63,13 @@ ApplicationWindow {
         model: histogramModel
     }
 
+
+    Connections{
+        target: backend
+
+        function onSigError(errorText){
+            errorDialog.title = errorText;
+            errorDialog.open();
+        }
+    }
 }
-
-
-
-/*##^##
-Designer {
-    D{i:0;autoSize:true;height:480;width:640}D{i:1}D{i:3}D{i:2}
-}
-##^##*/

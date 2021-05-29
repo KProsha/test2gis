@@ -3,6 +3,8 @@
 
 #include <QAbstractListModel>
 
+#include "../backend/histogramstate.h"
+
 class HistogramModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -33,7 +35,7 @@ public:
 public slots:
     void setFileName(const QString& fileName);
     void setPercent(int percent);
-    void setData(QList<QPair<QString, int> > data);
+    void setData(HistogramState state);
 
 signals:
     void sigCountChanged();
@@ -44,6 +46,7 @@ signals:
 private:
     QString _fileName;
     int _percent;
+    int _maxValue;
 
     QList<QPair<QString, int> > _data;
 

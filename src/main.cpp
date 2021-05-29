@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-
+#include <QTextCodec>
 
 #include "backend/backend.h"
 
@@ -9,6 +9,8 @@ int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
+
+    qRegisterMetaType<HistogramState>("HistogramState");
 
     Backend backend;
 

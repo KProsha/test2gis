@@ -22,6 +22,8 @@ public:
 
 signals:
     void sigParseFile(QString filename);
+    void sigError(QString errorText);
+    void sigPercent(int value);
 
 private:
     HistogramModel* _histogramModel;

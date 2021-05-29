@@ -101,7 +101,7 @@ Rectangle {
         from: 0
         to: 100
 
-        value: 0.5
+        value: root.model.percent
     }
 
 
