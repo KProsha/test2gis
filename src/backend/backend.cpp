@@ -13,7 +13,7 @@ Backend::Backend(QObject *parent): QObject(parent)
 
     connect(parserThread, &QThread::finished, _parser, &QObject::deleteLater);
 
-    connect(this, &Backend::sigParseFile, _parser, &Parser::parceFile);
+    connect(this, &Backend::sigParseFile, _parser, &Parser::parseFile);
     connect(this, &Backend::sigParseFile, _histogramModel, &HistogramModel::setFileName);
 
     connect(_parser, &Parser::sigState, _histogramModel, &HistogramModel::setData);

@@ -1,41 +1,66 @@
 #include "parser.h"
 
-#include <QFile>
-#include <QTextStream>
 #include <QRegularExpression>
 #include <QTextCodec>
+#include <QSharedPointer>
 
 #include <QDebug>
 
 Parser::Parser(QObject *parent) : QObject(parent)
 {
+    _state = STATEREADY;
 
+    connect(this, &Parser::sigContinue, this, &Parser::continueParse, Qt::QueuedConnection);
 }
 
-void Parser::parceFile(const QString& fileName)
+void Parser::parseFile(const QString& fileName)
 {
-    QScopedPointer<QFile> file(new QFile(fileName));
+    if(_state != STATEREADY) return;
 
-    if (!file->open(QIODevice::ReadOnly | QIODevice::Text))
+    _dictionary.clear();
+    _viewedWord.clear();
+
+    _state = STATEBUSY;
+
+    _file = QSharedPointer<QFile>(new QFile(fileName));
+
+    if (!_file->open(QIODevice::ReadOnly | QIODevice::Text))
         return;
 
-    int percent = 0;
-    qint64 fileSize = file->size();
 
-    QMap<QString, int> top15;
+    _fileSize = _file->size();
 
-    QTextStream stream(file.data());
+    _stream = QSharedPointer<QTextStream>(new QTextStream(_file.data()));
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-    stream.setCodec(codec);
+    _stream->setCodec(codec);
 
-    while(!stream.atEnd()){
+    emit sigContinue();
+}
+
+void Parser::breakWork()
+{
+    _state = STATEEND;
+}
+
+void Parser::continueParse()
+{
+    if(_state != STATEBUSY){
+
+        _state = STATEREADY;
+        return;
+    }
+
+    int wordReaded = 0;
+
+    while(!_stream->atEnd()){
         QString rawWord;
-        stream >> rawWord;
+        *_stream >> rawWord;
 
         QStringList rawWordList;
         rawWordList = rawWord.split(QRegularExpression("[\\.\\,\\!\\@\\#\\*\\+\\-\\<\\>\\{\\}\\[\\]\\(\\)\\|\\'\\\"\\?\\/\\\\]"), Qt::SkipEmptyParts);
 
         foreach(QString word, rawWordList){
+            word = word.toLower();
             // ----- dictionary -----
 
             int wordCount = _dictionary.value(word);
@@ -44,38 +69,50 @@ void Parser::parceFile(const QString& fileName)
             _dictionary.insert(word, wordCount);
 
             // ----- get 15 most frequent  -----
+            ++wordReaded;
+
+            if(_viewedWord.count() < _viewedWordCount){
+                _viewedWord.insert(word, wordCount);
+                continue;
+            }
+
+            if(_viewedWord.contains(word)){
+                _viewedWord.insert(word, wordCount);
+                continue;
+            }
             QString keyToDelete;
             int minValue = wordCount;
-
-            if(top15.count() < 15){
-                top15.insert(word, wordCount);
-            } else {
-                for(auto it = top15.begin(); it != top15.end(); ++it){
-                    if(it.value() < minValue){
-                        keyToDelete = it.key();
-                        minValue = it.value();
-                    }
-                }
-
-                if(!keyToDelete.isEmpty()){
-                    top15.remove(keyToDelete);
-                    top15.insert(word, wordCount);
+            for(auto it = _viewedWord.begin(); it != _viewedWord.end(); ++it){
+                if(it.value() < minValue){
+                    keyToDelete = it.key();
+                    minValue = it.value();
                 }
             }
 
-            // ----- progress -----
-            int newPercent = static_cast<int>((stream.pos() * 100) / fileSize);
-            if(newPercent > percent){
-                percent = newPercent;
-
-                emit sigPercent(newPercent);
-                emit sigState(top15);
+            if(!keyToDelete.isEmpty()){
+                _viewedWord.remove(keyToDelete);
+                _viewedWord.insert(word, wordCount);
             }
+        }
+        // ----- progress -----
+        if(wordReaded > _blockWordCont){
+            wordReaded = 0;
+
+            int percent = static_cast<int>((_stream->pos() * 100) / _fileSize);
+
+            emit sigPercent(percent);
+            emit sigState(_viewedWord);
+
+            emit sigContinue();
+            return;
         }
     }
 
-    emit sigPercent(100);
-    emit sigState(top15);
+    _file->close();
 
-    file->close();
+    emit sigPercent(100);
+    emit sigState(_viewedWord);
+
+    _state = STATEEND;
+    emit sigContinue();
 }
